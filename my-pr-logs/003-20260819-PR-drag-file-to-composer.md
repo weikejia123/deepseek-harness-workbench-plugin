@@ -1,6 +1,7 @@
 # PR 报告 003 — 拖拽文件树节点到消息框追加路径
 
 - **PR**: [#11](https://github.com/loadingvx/deepseek-harness-workbench-plugin/pull/11) `feat(workbench): drag a file-tree node onto the composer to append its path`
+- **PR URL**: https://github.com/loadingvx/deepseek-harness-workbench-plugin/pull/11
 - **目标仓库**: loadingvx/deepseek-harness-workbench-plugin（上游官方，base=main）
 - **提交时间**: 2026-08-19 05:02（UTC 2026-08-18T21:02:10Z）
 - **分支**: `weikejia123:feat/drag-file-to-composer` → 上游 `main`

@@ -1,6 +1,7 @@
 # PR 报告 001 — 文件树刷新按钮
 
 - **PR**: [#9](https://github.com/loadingvx/deepseek-harness-workbench-plugin/pull/9) `feat(tree): add a refresh button to the file tree header`
+- **PR URL**: https://github.com/loadingvx/deepseek-harness-workbench-plugin/pull/9
 - **目标仓库**: loadingvx/deepseek-harness-workbench-plugin（上游官方，base=main）
 - **提交时间**: 2026-08-19 05:01（UTC 2026-08-18T21:01:53Z）
 - **分支**: `weikejia123:feat/file-tree-refresh` → 上游 `main`
