@@ -1188,7 +1188,6 @@ export function FileTree({ client, workspaceId, workspaceTitle, workspacePath, a
           editorsReady={editorsReady}
           revealLabel={revealLabel}
           busy={busyPath !== null || workspaceId === undefined}
-          workspacePath={workspacePath}
           t={t}
           onOpen={() => { openMenuTarget(ctxMenu.target) }}
           onCopyRelPath={() => {

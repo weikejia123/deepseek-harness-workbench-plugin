@@ -693,8 +693,6 @@ function WorkbenchInner(props: WorkbenchProps) {
           }
           update={updateInfo}
           onDismissUpdate={() => { setUpdateHidden(true) }}
-          useSessions={props.useSessions}
-          useWorkspaces={props.useWorkspaces}
           t={t}
         />
       ) : (
