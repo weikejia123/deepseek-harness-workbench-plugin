@@ -48,3 +48,5 @@
 | V6-20260818 | 2026-08-18 | 二开版本号规约落地：package.json version → `0.1.17-wkj-1`（官方 0.1.17 基础上的首个二开版本，规约见根目录 AGENTS.md） |
 | V7-20260818 | 2026-08-18 | 跟随上游：main fast-forward 到 upstream/main（0.1.18，含 external-open WSL 支持 / graph-layout / StatusBar editorOpen 等 4 个提交），合并到 wkj-dev；冲突解决（package.json version → `0.1.18-wkj-1`，二开版本按规约重新计；lib/client.js 重建为合并产物）；测试无回归（环境固有 23 个失败与基线一致） |
 | V8-20260818 | 2026-08-18 | 上游变更记录落地：`my-docs/25-上游变更/001-上游变更-0.1.17至0.1.18-20260818.md`（4 个提交逐项详情 + 与二开关系） |
+| V9-20260818 | 2026-08-18 | 二开修复：拖拽文件树节点到消息框真机失效修复（设计报告 001 V3）——effectAllowed 'move'→'copyMove'（与 dragover dropEffect 'copy' 兼容，Chrome 不再取消 drop）+ 补 text/plain 完整路径兜底 + dragover 门禁由 getData 改 types.includes（Firefox 自定义类型 dragover 阶段不可读）；构建与测试通过 |
+| V10-20260818 | 2026-08-18 | 归档会话能力**整体回滚删除**（用户决定：点击看不到内容、价值低，避免污染）：删除 ArchivesPanel / archive-times / ArchiveHistory / archive-history 及全部接线（SideDock / Workbench / rail / index / types / icons / auto-open / locales），测试一并删除，lib 重建零残留；根因（dsh 运行时硬清除归档选中 + 无 unarchive API）记录于设计报告 002 V4（降级为根因记录） |

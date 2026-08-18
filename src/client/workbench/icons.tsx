@@ -414,14 +414,3 @@ export function IconNpm({ size = 16 }: { size?: number }) {
     </Icon>
   )
 }
-
-/** Archive box: lists archived sessions in the side dock. */
-export function IconArchive() {
-  return (
-    <Icon>
-      <path d="M2.4 3.4h11.2v3H2.4z" fill="none" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M3.6 6.2v6.6h8.8V6.2" fill="none" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M6.6 8.6h2.8" fill="none" stroke="currentColor" strokeWidth="1.2" />
-    </Icon>
-  )
-}

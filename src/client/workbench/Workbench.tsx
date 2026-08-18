@@ -21,9 +21,8 @@ import {
 import { EditorPane } from './EditorPane.tsx'
 import { loadEditorMode, saveEditorMode, type EditorModeId } from './editor-mode.ts'
 import { IconButton } from './IconButton.tsx'
-import { IconArchive, IconChat, IconEditor, IconFiles, IconGit, IconLayout, IconUsage } from './icons.tsx'
+import { IconChat, IconEditor, IconFiles, IconGit, IconLayout, IconUsage } from './icons.tsx'
 import { ensureIdeStyles } from './ide-host.css.ts'
-import { recordArchivedIds } from './archive-times.ts'
 import railCss from './Rail.module.css'
 import { SideDock } from './SideDock.tsx'
 import { termIdFromTabId } from '../../shared/new-file-path.ts'
@@ -198,12 +197,6 @@ function WorkbenchInner(props: WorkbenchProps) {
   const running = Boolean(props.useSession?.(state => state.running))
   const pending = (props.useSession?.(state => state.pending)?.length ?? 0) as number
   const split = shouldSplitWorkbench(enabled)
-
-  /** Stamp plugin-recorded archive times whenever the archive set grows. */
-  const archivedIds = useWorkspaces(state => state.archivedSessionIds) as readonly string[]
-  useEffect(() => {
-    recordArchivedIds(archivedIds)
-  }, [archivedIds])
 
   useEffect(() => {
     if (running || pending > 0) patchWorkbenchChrome({ chatOpen: true })
@@ -497,6 +490,12 @@ function WorkbenchInner(props: WorkbenchProps) {
       const rel = dt.getData('application/x-dsh-path')
       return rel === '' ? null : rel
     }
+    // Gate dragover on the TYPES list, not getData: the types array is
+    // readable during dragover in every engine, while custom-type DATA is not
+    // (Firefox only exposes text/* there) — a getData gate would never call
+    // preventDefault on Firefox and the drop would stay forbidden.
+    const dragCarriesPath = (dt: DataTransfer | null): boolean =>
+      dt !== null && dt.types.includes('application/x-dsh-path')
     const seatOf = (target: EventTarget | null): HTMLElement | null => {
       if (!(target instanceof Element)) return null
       return target.closest<HTMLElement>('[data-composer-seat]')
@@ -505,10 +504,11 @@ function WorkbenchInner(props: WorkbenchProps) {
       seat.removeAttribute('data-dsh-drop-target')
     }
     const onDragOver = (event: DragEvent): void => {
-      if (relPathOf(event.dataTransfer) === null) return
+      if (!dragCarriesPath(event.dataTransfer)) return
       const seat = seatOf(event.target)
       if (seat === null) return
       event.preventDefault()
+      // 'copy' is legal now: the drag source declares effectAllowed 'copyMove'.
       if (event.dataTransfer !== null) event.dataTransfer.dropEffect = 'copy'
       seat.setAttribute('data-dsh-drop-target', '')
     }
@@ -693,7 +693,6 @@ function WorkbenchInner(props: WorkbenchProps) {
           }
           update={updateInfo}
           onDismissUpdate={() => { setUpdateHidden(true) }}
-          openSession={props.openSession}
           useSessions={props.useSessions}
           useWorkspaces={props.useWorkspaces}
           t={t}
@@ -711,9 +710,6 @@ function WorkbenchInner(props: WorkbenchProps) {
               <IconUsage />
             </IconButton>
           ) : null}
-          <IconButton label={t('ide.archives')} onClick={() => { patchWorkbenchChrome({ sideOpen: true, sideTab: 'archives' }) }}>
-            <IconArchive />
-          </IconButton>
         </div>
       )}
       <UsageNavPortal

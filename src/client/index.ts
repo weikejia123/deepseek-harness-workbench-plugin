@@ -1,4 +1,4 @@
-import type { ClientContext, SessionId } from '@deepseek-ai/dsh-client-runtime/client'
+import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import type {} from '@deepseek-ai/dsh-client-ui-tool/client'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
@@ -24,7 +24,6 @@ export function apply(ctx: ClientContext): void {
     inject: () => ({
       client,
       mount: 'host' as const,
-      openSession: (id: string) => ctx.sessions.open(id as SessionId),
     }),
   }, Workbench))
 
@@ -35,7 +34,6 @@ export function apply(ctx: ClientContext): void {
     inject: () => ({
       client,
       mount: 'toggle' as const,
-      openSession: (id: string) => ctx.sessions.open(id as SessionId),
     }),
   }, Workbench))
 

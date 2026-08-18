@@ -2,11 +2,10 @@ import { useLayoutEffect, useSyncExternalStore, type ReactNode } from 'react'
 import type { GitClient } from '../api.ts'
 import type { PluginUpdateSnapshot } from '../../shared/types.ts'
 import type { SideTab } from './auto-open.ts'
-import { ArchivesPanel, type ArchivesPanelProps } from './ArchivesPanel.tsx'
 import { FileTree } from './FileTree.tsx'
 import { GitSidebar } from './GitSidebar.tsx'
 import { IconButton } from './IconButton.tsx'
-import { IconArchive, IconFiles, IconGit, IconPanelOff, IconUsage } from './icons.tsx'
+import { IconFiles, IconGit, IconPanelOff, IconUsage } from './icons.tsx'
 import type { Translate } from './types.ts'
 import { UpdateBanner } from './UpdateBanner.tsx'
 import { UsagePanel } from './UsagePanel.tsx'
@@ -23,7 +22,7 @@ import css from './SideDock.module.css'
 export type { SideTab }
 
 export function SideDock({
-  client, workspaceId, workspaceTitle, workspacePath, sessionId, running, useProjection, activePath, selected, tab, onTab, onOpenFile, onOpenDiff, onOpenCommitDiff, onRenamed, onDeleted, onCollapse, leadingSash, update, onDismissUpdate, openSession, useSessions, useWorkspaces, t,
+  client, workspaceId, workspaceTitle, workspacePath, sessionId, running, useProjection, activePath, selected, tab, onTab, onOpenFile, onOpenDiff, onOpenCommitDiff, onRenamed, onDeleted, onCollapse, leadingSash, update, onDismissUpdate, t,
 }: {
   client: GitClient
   workspaceId?: string
@@ -45,9 +44,6 @@ export function SideDock({
   leadingSash?: ReactNode
   update?: PluginUpdateSnapshot | null
   onDismissUpdate?: () => void
-  openSession?: (id: string) => void
-  useSessions?: (selector: (state: object) => unknown) => unknown
-  useWorkspaces?: (selector: (state: object) => unknown) => unknown
   t: Translate
 }) {
   const dock = useSyncExternalStore(subscribeUsageDock, readUsageDock, defaultUsageDock)
@@ -74,9 +70,6 @@ export function SideDock({
             <IconUsage />
           </IconButton>
         ) : null}
-        <IconButton label={t('ide.archives')} active={tab === 'archives'} onClick={() => { onTab('archives') }}>
-          <IconArchive />
-        </IconButton>
         <span className={css.spacer} />
         <IconButton label={t('ide.hideSide')} onClick={onCollapse}>
           <IconPanelOff />
@@ -98,13 +91,6 @@ export function SideDock({
             sessionId={sessionId}
             running={running}
             useProjection={useProjection}
-            t={t}
-          />
-        ) : tab === 'archives' ? (
-          <ArchivesPanel
-            useSessions={useSessions as ArchivesPanelProps['useSessions']}
-            useWorkspaces={useWorkspaces as ArchivesPanelProps['useWorkspaces']}
-            openSession={openSession}
             t={t}
           />
         ) : (
