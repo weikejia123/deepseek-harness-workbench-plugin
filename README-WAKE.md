@@ -42,3 +42,4 @@
 |------|------|------|
 | V1-20260818 | 2026-08-18 | 创建入口文档：fork 初始化（upstream + origin + wkj-dev + 独立 git） |
 | V2-20260818 | 2026-08-18 | 目录迁移：移至 `projects/dsh-plugins-code/deepseek-harness-workbench-plugin/`（`dsh-plugins-code/` 作为 dsh 插件管理 hub） |
+| V3-20260818 | 2026-08-18 | 安全扫描（V1 报告，结论无风险），报告存于 `my-docs/71-安全报告/` |
