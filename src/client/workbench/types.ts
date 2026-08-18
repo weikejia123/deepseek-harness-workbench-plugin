@@ -15,6 +15,8 @@ export interface WorkbenchInjected {
   client: GitClient
   /** `host` portals the IDE; `toggle` is the header button. Default `toggle`. */
   mount?: WorkbenchMount
+  /** Open an archived session for review (client `sessions.open`). */
+  openSession?: (id: string) => void
 }
 
 export const TERMINAL_TAB_ID = 'terminal:main'

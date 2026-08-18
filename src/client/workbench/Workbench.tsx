@@ -21,8 +21,9 @@ import {
 import { EditorPane } from './EditorPane.tsx'
 import { loadEditorMode, saveEditorMode, type EditorModeId } from './editor-mode.ts'
 import { IconButton } from './IconButton.tsx'
-import { IconChat, IconEditor, IconFiles, IconGit, IconLayout, IconUsage } from './icons.tsx'
+import { IconArchive, IconChat, IconEditor, IconFiles, IconGit, IconLayout, IconUsage } from './icons.tsx'
 import { ensureIdeStyles } from './ide-host.css.ts'
+import { recordArchivedIds } from './archive-times.ts'
 import railCss from './Rail.module.css'
 import { SideDock } from './SideDock.tsx'
 import { termIdFromTabId } from '../../shared/new-file-path.ts'
@@ -197,6 +198,12 @@ function WorkbenchInner(props: WorkbenchProps) {
   const running = Boolean(props.useSession?.(state => state.running))
   const pending = (props.useSession?.(state => state.pending)?.length ?? 0) as number
   const split = shouldSplitWorkbench(enabled)
+
+  /** Stamp plugin-recorded archive times whenever the archive set grows. */
+  const archivedIds = useWorkspaces(state => state.archivedSessionIds) as readonly string[]
+  useEffect(() => {
+    recordArchivedIds(archivedIds)
+  }, [archivedIds])
 
   useEffect(() => {
     if (running || pending > 0) patchWorkbenchChrome({ chatOpen: true })
@@ -475,6 +482,72 @@ function WorkbenchInner(props: WorkbenchProps) {
     return () => { window.removeEventListener('keydown', onKey, true) }
   }, [openNewTerminal])
 
+  /**
+   * Dragging a file-tree node onto the composer appends the quoted absolute
+   * path to the draft. The composer is dsh shell UI ([data-composer-seat] >
+   * textarea), outside this plugin's React tree, so we listen on window in
+   * the capture phase and only act when the drop target sits inside it.
+   */
+  useEffect(() => {
+    const workspacePath = workspace?.path
+    if (workspacePath === undefined) return
+    const root = workspacePath.replace(/\/+$/, '')
+    const relPathOf = (dt: DataTransfer | null): string | null => {
+      if (dt === null) return null
+      const rel = dt.getData('application/x-dsh-path')
+      return rel === '' ? null : rel
+    }
+    const seatOf = (target: EventTarget | null): HTMLElement | null => {
+      if (!(target instanceof Element)) return null
+      return target.closest<HTMLElement>('[data-composer-seat]')
+    }
+    const clearMark = (seat: HTMLElement): void => {
+      seat.removeAttribute('data-dsh-drop-target')
+    }
+    const onDragOver = (event: DragEvent): void => {
+      if (relPathOf(event.dataTransfer) === null) return
+      const seat = seatOf(event.target)
+      if (seat === null) return
+      event.preventDefault()
+      if (event.dataTransfer !== null) event.dataTransfer.dropEffect = 'copy'
+      seat.setAttribute('data-dsh-drop-target', '')
+    }
+    const onDragLeave = (event: DragEvent): void => {
+      const seat = seatOf(event.target)
+      if (seat !== null) clearMark(seat)
+    }
+    const onDrop = (event: DragEvent): void => {
+      const rel = relPathOf(event.dataTransfer)
+      const seat = seatOf(event.target)
+      if (rel === null || seat === null) return
+      event.preventDefault()
+      event.stopPropagation()
+      clearMark(seat)
+      const textarea = seat.querySelector<HTMLTextAreaElement>('textarea')
+      if (textarea === null) return
+      const full = root === '' ? rel : `${root}/${rel}`
+      const quoted = `"${full}"`
+      const current = textarea.value
+      const sep = current === '' || /\s$/.test(current) ? '' : ' '
+      const next = current + sep + quoted
+      // React-controlled textarea: write via the native setter, then dispatch
+      // an input event so the composer's onChange picks the draft up.
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set
+      setter?.call(textarea, next)
+      textarea.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: quoted }))
+      textarea.focus()
+      textarea.setSelectionRange(next.length, next.length)
+    }
+    window.addEventListener('dragover', onDragOver, true)
+    window.addEventListener('dragleave', onDragLeave, true)
+    window.addEventListener('drop', onDrop, true)
+    return () => {
+      window.removeEventListener('dragover', onDragOver, true)
+      window.removeEventListener('dragleave', onDragLeave, true)
+      window.removeEventListener('drop', onDrop, true)
+    }
+  }, [workspace?.path])
+
   const closeTab = (id: string): void => {
     closeTabs([id])
   }
@@ -596,6 +669,7 @@ function WorkbenchInner(props: WorkbenchProps) {
           client={client}
           workspaceId={workspaceId}
           workspaceTitle={workspace?.title}
+          workspacePath={workspace?.path}
           sessionId={sessionId}
           running={running}
           useProjection={props.useProjection}
@@ -619,6 +693,9 @@ function WorkbenchInner(props: WorkbenchProps) {
           }
           update={updateInfo}
           onDismissUpdate={() => { setUpdateHidden(true) }}
+          openSession={props.openSession}
+          useSessions={props.useSessions}
+          useWorkspaces={props.useWorkspaces}
           t={t}
         />
       ) : (
@@ -634,6 +711,9 @@ function WorkbenchInner(props: WorkbenchProps) {
               <IconUsage />
             </IconButton>
           ) : null}
+          <IconButton label={t('ide.archives')} onClick={() => { patchWorkbenchChrome({ sideOpen: true, sideTab: 'archives' }) }}>
+            <IconArchive />
+          </IconButton>
         </div>
       )}
       <UsageNavPortal

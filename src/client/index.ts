@@ -1,4 +1,4 @@
-import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
+import type { ClientContext, SessionId } from '@deepseek-ai/dsh-client-runtime/client'
 import type {} from '@deepseek-ai/dsh-client-ui-tool/client'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
@@ -21,14 +21,22 @@ export function apply(ctx: ClientContext): void {
     name: 'conversation.input.overlay',
     id: 'workbench-host',
     locale: NS,
-    inject: () => ({ client, mount: 'host' as const }),
+    inject: () => ({
+      client,
+      mount: 'host' as const,
+      openSession: (id: string) => ctx.sessions.open(id as SessionId),
+    }),
   }, Workbench))
 
   ctx.slots.inject('conversation.session.header.utilities', () => ctx.slots.register({
     name: 'conversation.session.header.utilities',
     id: 'workbench',
     locale: NS,
-    inject: () => ({ client, mount: 'toggle' as const }),
+    inject: () => ({
+      client,
+      mount: 'toggle' as const,
+      openSession: (id: string) => ctx.sessions.open(id as SessionId),
+    }),
   }, Workbench))
 
   ctx.slots.inject('tool.call.toolview', function* () {
