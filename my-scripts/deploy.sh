@@ -131,6 +131,16 @@ if [[ -e "$WEB_NM/dsh-git-plugin" || -L "$WEB_NM/dsh-git-plugin" ]]; then
   rm -rf "$WEB_NM/dsh-git-plugin"
 fi
 
+# 0.1.19 起 Ultra Slash 并入本插件：若 profile 残留独立
+# deepseek-harness-ultra-slash 包，会抢同一套 / 命令与 locale，
+# 报「ultra-slash already has locale zh」导致整包加载失败（官方 dev.sh 同款清理）。
+if [[ -f "$WEB_PKG" ]] && grep -q '"deepseek-harness-ultra-slash"' "$WEB_PKG"; then
+  "${DSH_ARGS[@]}" plugin --profile web remove deepseek-harness-ultra-slash || true
+fi
+if [[ -e "$WEB_NM/deepseek-harness-ultra-slash" || -L "$WEB_NM/deepseek-harness-ultra-slash" ]]; then
+  rm -rf "$WEB_NM/deepseek-harness-ultra-slash"
+fi
+
 echo "▶ 安装本仓库到 web profile（dsh plugin --profile web add）…"
 "${DSH_ARGS[@]}" plugin --profile web add "$ROOT"
 
