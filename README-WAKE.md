@@ -46,3 +46,4 @@
 | V4-20260818 | 2026-08-18 | 二开（wkj-dev）：文件树刷新按钮 / 右键复制相对·完整路径 / 拖拽节点到消息框追加完整路径 / 右侧栏「归档」标签页（归档会话列表+归档时间+点击查看）；设计实现报告存于 `my-docs/21-设计与实现/` |
 | V5-20260818 | 2026-08-18 | 新增 `my-scripts/deploy.sh` 一键部署（不依赖 mise，自动装依赖→构建→安装到 web profile），本机实测通过 |
 | V6-20260818 | 2026-08-18 | 二开版本号规约落地：package.json version → `0.1.17-wkj-1`（官方 0.1.17 基础上的首个二开版本，规约见根目录 AGENTS.md） |
+| V7-20260818 | 2026-08-18 | 跟随上游：main fast-forward 到 upstream/main（0.1.18，含 external-open WSL 支持 / graph-layout / StatusBar editorOpen 等 4 个提交），合并到 wkj-dev；冲突解决（package.json version → `0.1.18-wkj-1`，二开版本按规约重新计；lib/client.js 重建为合并产物）；测试无回归（环境固有 23 个失败与基线一致） |
