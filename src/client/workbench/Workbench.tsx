@@ -733,6 +733,7 @@ function WorkbenchInner(props: WorkbenchProps) {
         tabs={tabs}
         aiTermIds={aiTermIds}
         editorMode={editorMode}
+        editorOpen={editorOpen}
         onEditorModeChange={changeEditorMode}
         onActivate={(id) => {
           patchWorkbenchChrome({ editorOpen: true })
