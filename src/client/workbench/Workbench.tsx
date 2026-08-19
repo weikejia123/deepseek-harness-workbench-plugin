@@ -79,7 +79,7 @@ import { DEFAULT_TERM_AI_OPEN, TERM_AI_OPEN_KEY, readBoolFlag, writeBoolFlag } f
 import { usePluginUpdate, visibleUpdate } from './UpdateBanner.tsx'
 import { updateTermSeed } from '../../shared/version.ts'
 import { useWorkspace } from './useWorkspace.ts'
-import { useAttentionCounts, useAttentionPersist, useSessionBeep, playBuiltinSound, playCustomSound } from './useSessionMonitor.ts'
+import { useAttentionCounts, useAttentionPersist, useSessionBeep, playBuiltinSound, playCustomSound, sharedBeepRef } from './useSessionMonitor.ts'
 import { BUILTIN_SOUNDS } from '../../shared/workbench-sounds/builtins.ts'
 import {
   composerSeatOf,
@@ -265,12 +265,13 @@ function WorkbenchInner(props: WorkbenchProps) {
   useAttentionPersist(useSessions, useWorkspaces)
   const openSession = useCallback((id: string): void => { props.sessions?.open?.(id) }, [props.sessions])
   const playSound = useCallback(() => {
-    const acRef = { ac: null as AudioContext | null }
     try {
       const soundId = localStorage.getItem('dsh-workbench-sound-id') ?? 'chime-ascending'
       const builtin = BUILTIN_SOUNDS.find(s => s.id === soundId)
       if (builtin) {
-        playBuiltinSound(builtin, acRef)
+        // 共享复用同一个 AudioContext（模块级，跨重挂载保留）：每次新建会被
+        // 浏览器自动播放策略/上下文数量上限击穿，导致有注意事项时一声不响。
+        playBuiltinSound(builtin, sharedBeepRef)
       } else {
         // Custom sound via HTTP
         playCustomSound(`/workbench-sounds/${soundId}`)
