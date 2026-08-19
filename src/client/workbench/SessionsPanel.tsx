@@ -25,7 +25,7 @@ import {
   type WorkspaceListLike,
 } from './session-monitor.ts'
 import type { Translate } from './types.ts'
-import { useAckVersion, useBeepOn, useLoopReminder, useReminderInterval, type SessionSelectorHook, type WorkspaceSelectorHook } from './useSessionMonitor.ts'
+import { useAckVersion, useBeepOn, useLoopReminder, usePersistVersion, useReminderInterval, type SessionSelectorHook, type WorkspaceSelectorHook } from './useSessionMonitor.ts'
 import { SoundSettings } from './SoundSettings.tsx'
 import css from './SessionsPanel.module.css'
 
@@ -38,6 +38,7 @@ export function SessionsPanel({
   t: Translate
 }) {
   useAckVersion()
+  usePersistVersion()
   const list = useSessions((s) => s) as SessionListLike
   const wsSnapshot = useWorkspaces((s) => s) as WorkspaceListLike
   const wsItems = wsSnapshot.items ?? []

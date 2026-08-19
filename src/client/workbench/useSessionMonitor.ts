@@ -26,9 +26,12 @@ import {
   countRunning,
   getAckVersion,
   getBeepOn,
+  getPersistVersion,
+  reconcilePersistedAttention,
   setBeepOn,
   subscribeAck,
   subscribeBeep,
+  subscribePersist,
   type SessionListLike,
   type WorkspaceListLike,
 } from './session-monitor.ts'
@@ -47,6 +50,8 @@ export function useAttentionCounts(
   useWorkspaces: WorkspaceSelectorHook,
 ): AttentionCounts {
   const ackVersion = useSyncExternalStore(subscribeAck, getAckVersion, getAckVersion)
+  // 持久化"完成未查看"提醒变化时也要重算（reconcile 在 useEffect 里改模块态后 bump）。
+  const persistVersion = useSyncExternalStore(subscribePersist, getPersistVersion, getPersistVersion)
   // 归档集数组引用在未变化时保持稳定（workspaces 快照按 Object.is 比对选择器结果），
   // 故该订阅只在归档集合真正变化时触发重渲染。
   const archivedIds = useWorkspaces((state) => (state as WorkspaceListLike).archivedSessionIds) as
@@ -59,7 +64,34 @@ export function useAttentionCounts(
   const attention = useSessions((state) => countAttention(state, ackSnapshot(), archived)) as number
   const running = useSessions((state) => countRunning(state, archived)) as number
   void ackVersion
+  void persistVersion
   return { attention, running }
+}
+
+/**
+ * 持久化"完成未查看"提醒接线（挂在始终渲染的 WorkbenchInner 上，面板未打开也生效）：
+ * 订阅完整会话列表，任一变化即协调一次持久化记认（跨页面会话恢复完成提醒）。
+ */
+export function useAttentionPersist(
+  useSessions: SessionSelectorHook,
+  useWorkspaces: WorkspaceSelectorHook,
+): void {
+  const list = useSessions((s) => s) as SessionListLike
+  const archivedIds = useWorkspaces((state) => (state as WorkspaceListLike).archivedSessionIds) as
+    | string[]
+    | undefined
+  const archived = useMemo(() => {
+    const ids = archivedIds ?? []
+    return ids.length === 0 ? undefined : new Set(ids)
+  }, [archivedIds])
+  useEffect(() => {
+    reconcilePersistedAttention(list, archived)
+  }, [list, archived])
+}
+
+/** 持久化记认版本订阅（面板读取共享持久化状态时调用，触发重渲染）。 */
+export function usePersistVersion(): number {
+  return useSyncExternalStore(subscribePersist, getPersistVersion, getPersistVersion)
 }
 
 export function useAckVersion(): number {
